@@ -44,7 +44,7 @@ def test_register_user():
         page.check("input[name='psgdpr']")
         page.check("input[name='customer_privacy']")
 
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(1500)
 
         print(">>> Odesilam formular...")
         page.click("button:has-text('ULOŽIT')")
@@ -67,15 +67,15 @@ def test_register_user():
         assert email_val == user["email"], f"Email nesouhlasi: {email_val} vs {user['email']}"
         assert birthday_val == user["birthdate"], f"Narozeni nesouhlasi: {birthday_val} vs {user['birthdate']}"
 
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(1500)
 
         print(">>> Udaje souhlasi. Test probehl uspesne.")
 
         print(">>> Odhlasuji uzivatele...")
         page.click("text=Odhlásit")
 
-        print(">>> Hotovo, cekam 2 sekundy pred zavrenim...")
-        page.wait_for_timeout(2000)
+        print(">>> Hotovo, cekam 1,5 sekundy pred zavrenim...")
+        page.wait_for_timeout(1500)
         browser.close()
 
 if __name__ == "__main__":
