@@ -1,80 +1,83 @@
 from playwright.sync_api import sync_playwright
 from datetime import datetime
 import random
-import tempfile
 
 print("Soubor se spustil.")
 
 def generate_random_user():
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    random_suffix = ''.join(random.choices("abcdefghijklmnopqrstuvwxyz", k=5)).capitalize()
     return {
-        "first_name": "Test",
-        "last_name": "Tester",  # bez čísel, povoleny pouze písmena
+        "first_name": "Testovaci",
+        "last_name": f"Uzivatel{random_suffix}",
         "email": f"testuser{timestamp}@example.com",
-        "password": f"Str0ngPass!{random.randint(100, 999)}",  # silné heslo
-        "birthdate": "1990-01-01"
+        "password": f"Str0ngPass!{random.randint(100, 999)}",
+        "birthdate": "01.01.1990"
     }
 
 def test_register_user():
-    print(">>> Spouštím test_register_user")
+    print(">>> Spoustim test_register_user")
     user = generate_random_user()
 
     with sync_playwright() as p:
-        print(">>> Spouštím Chromium...")
+        print(">>> Spoustim Chromium...")
+        browser = p.chromium.launch(headless=False, args=["--window-size=2560,1440"])
+        context = browser.new_context(viewport={"width": 2560, "height": 1440})
+        page = context.new_page()
 
-        user_data_dir = tempfile.mkdtemp()
-        context = p.chromium.launch_persistent_context(
-            user_data_dir,
-            headless=False,
-            viewport={"width": 2560, "height": 1440},
-            args=["--window-position=0,0", "--window-size=2560,1440"]
-        )
-
-        page = context.pages[0] if context.pages else context.new_page()
-
-        print(">>> Otevírám hlavní stránku...")
+        print(">>> Oteviram hlavni stranku...")
         page.goto("http://37.27.17.198:8084/cs/")
 
-        print(">>> Klikám na 'Přihlásit se'...")
+        print(">>> Klikam na 'Prihlasit se'...")
         page.click("text=Přihlásit se")
 
-        print(">>> Klikám na 'Vytvořte si jej zde'...")
+        print(">>> Klikám na 'Vytvorte si jej zde'...")
         page.click("text=Vytvořte si jej zde")
 
-        print(">>> Vyplňuji formulář...")
-        page.check("input[name='id_gender'][value='1']")  # Pan
+        print(">>> Vyplnuji formular...")
+        page.check("input[name='id_gender'][value='1']")
         page.fill("input[name='firstname']", user["first_name"])
         page.fill("input[name='lastname']", user["last_name"])
         page.fill("input[name='email']", user["email"])
         page.fill("input[name='password']", user["password"])
         page.fill("input[name='birthday']", user["birthdate"])
-        page.check("input[name='psgdpr']")  # Ochrana osobních údajů
-        page.check("input[name='customer_privacy']")  # Ochrana osobních údajů
+        page.check("input[name='psgdpr']")
+        page.check("input[name='customer_privacy']")
 
-        print(">>> Odesílám formulář...")
+        page.wait_for_timeout(2000)
+
+        print(">>> Odesilam formular...")
         page.click("button:has-text('ULOŽIT')")
 
-        print(">>> Čekám na přesměrování / potvrzení...")
-        page.wait_for_timeout(3000)
+        print(">>> Cekam na prihlaseni...")
+        page.wait_for_selector("a.account", timeout=15000)
 
-        print(">>> Kontroluji přihlášení...")
+        print(">>> Kontroluji profil...")
+        page.click("a.account")
+        page.click("text=Informace")
 
-        # Ověření jména uživatele
-        assert page.get_by_text("Test Tester").is_visible(), "Uživatelské jméno se nezobrazilo."
+        print(">>> Kontroluji vyplnene udaje...")
+        firstname_val = page.get_attribute("input[name='firstname']", "value")
+        lastname_val = page.get_attribute("input[name='lastname']", "value")
+        email_val = page.get_attribute("input[name='email']", "value")
+        birthday_val = page.get_attribute("input[name='birthday']", "value")
 
-        # Ověření přítomnosti tlačítka Odhlásit – přesné zacílení
-        assert page.get_by_role("link", name="Odhlásit", exact=True).is_visible(), "Tlačítko 'Odhlásit' se nezobrazilo."
+        assert firstname_val == user["first_name"], f"Jmeno nesouhlasi: {firstname_val} vs {user['first_name']}"
+        assert lastname_val == user["last_name"], f"Prijmeni nesouhlasi: {lastname_val} vs {user['last_name']}"
+        assert email_val == user["email"], f"Email nesouhlasi: {email_val} vs {user['email']}"
+        assert birthday_val == user["birthdate"], f"Narozeni nesouhlasi: {birthday_val} vs {user['birthdate']}"
 
-        print(">>> Přihlášení potvrzeno.")
+        page.wait_for_timeout(2000)
 
-        # Testovací prodleva pro vizuální ověření
-        page.wait_for_timeout(10000)
+        print(">>> Udaje souhlasi. Test probehl uspesne.")
 
-        print(">>> Hotovo.")
+        print(">>> Odhlasuji uzivatele...")
+        page.click("text=Odhlásit")
 
-        # Nepovinně zavřít browser (během vývoje můžeš zakomentovat)
-        # context.close()
+        print(">>> Hotovo, cekam 2 sekundy pred zavrenim...")
+        page.wait_for_timeout(2000)
+        browser.close()
 
 if __name__ == "__main__":
-    print(">>> Soubor byl spuštěn napřímo")
+    print(">>> Soubor byl spusten naprimo")
     test_register_user()
