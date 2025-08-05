@@ -3,7 +3,7 @@
 Repozitář obsahuje:
 - Playwright testy pro webové UI
 - Postman kolekci s testy pro Spotify API
-- GitHub Actions workflow, který automaticky spouští API testy pomocí Newmanu i Playwright testy 
+- GitHub Actions workflows, které automaticky spouští API testy pomocí Newmanu i Playwright testy 
 
 ## Spuštění API testů
 API testy se spouští přes GitHub Actions → např. Run Spotify API tests.
