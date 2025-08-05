@@ -1,0 +1,67 @@
+{
+  "info": {
+    "name": "Spotify API Tests",
+    "_postman_id": "abc123",
+    "description": "Updated Spotify tests for GitHub Actions",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Access Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          },
+          {
+            "key": "Authorization",
+            "value": "Basic {{spotify_basic_auth}}"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "refresh_token"
+            },
+            {
+              "key": "refresh_token",
+              "value": "{{spotify_refresh_token}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "https://accounts.spotify.com/api/token",
+          "protocol": "https",
+          "host": ["accounts", "spotify", "com"],
+          "path": ["api", "token"]
+        }
+      }
+    },
+    {
+      "name": "Looking for a song",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/search?q=kometa%20nohavica&type=track&limit=1",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "search"],
+          "query": [
+            { "key": "q", "value": "kometa nohavica" },
+            { "key": "type", "value": "track" },
+            { "key": "limit", "value": "1" }
+          ]
+        }
+      }
+    }
+  ]
+}
