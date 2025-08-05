@@ -26,5 +26,5 @@ jobs:
 
       - name: Run Postman collection with Newman
         run: |
-          newman run ./spotify_tests.postman_collection.json \
+          newman run ./spotify_api_tests.postman_collection.json \
             --env-var "access_token=$ACCESS_TOKEN"
