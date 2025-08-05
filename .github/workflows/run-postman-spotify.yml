@@ -1,0 +1,30 @@
+name: Run Spotify API tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-newman-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Newman
+        run: npm install -g newman jq
+
+      - name: Get Access Token
+        id: get_token
+        run: |
+          RESPONSE=$(curl -s -X POST "https://accounts.spotify.com/api/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -u "${{ secrets.SPOTIFY_CLIENT_ID }}:${{ secrets.SPOTIFY_CLIENT_SECRET }}" \
+            -d "grant_type=refresh_token&refresh_token=${{ secrets.SPOTIFY_REFRESH_TOKEN }}")
+
+          TOKEN=$(echo $RESPONSE | jq -r '.access_token')
+          echo "ACCESS_TOKEN=$TOKEN" >> $GITHUB_ENV
+
+      - name: Run Postman collection with Newman
+        run: |
+          newman run ./spotify_tests.postman_collection.json \
+            --env-var "access_token=$ACCESS_TOKEN"
