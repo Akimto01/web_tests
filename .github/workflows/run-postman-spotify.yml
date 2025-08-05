@@ -16,4 +16,7 @@ jobs:
       - name: Run Postman collection with Newman
         run: |
           newman run spotify_api_tests.postman_collection.json \
-            -e spotify_api_env.postman_environment.json
+            --environment spotify_api_environment.postman_environment.json \
+            --env-var "access_token=${{ secrets.SPOTIFY_ACCESS_TOKEN }}" \
+            --env-var "refresh_token=${{ secrets.SPOTIFY_REFRESH_TOKEN }}" \
+            --env-var "encoded_client_credentials=${{ secrets.SPOTIFY_ENCODED_CREDENTIALS }}"
